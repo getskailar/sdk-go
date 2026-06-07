@@ -147,7 +147,7 @@ func (c *Client) attempt(ctx context.Context, method, url string, body []byte, p
 	if err != nil {
 		return nil, transportError(err)
 	}
-	defer resp.Body.Close()
+	defer func() { _ = resp.Body.Close() }()
 
 	res := &bufferedResult{
 		status:     resp.StatusCode,
@@ -277,7 +277,7 @@ func shouldRetry(status int, idem idempotency, attempt, maxAttempts int) bool {
 
 // apiErrorFromResponse drains a non-2xx response and converts it to a [*Error].
 func (c *Client) apiErrorFromResponse(resp *http.Response, retryAfter int) error {
-	defer resp.Body.Close()
+	defer func() { _ = resp.Body.Close() }()
 	body, _ := io.ReadAll(io.LimitReader(resp.Body, maxResponseBytes))
 	requestID := extractRequestID(resp.Header)
 	return apiError(resp.StatusCode, requestID, retryAfter, body)

@@ -27,7 +27,7 @@ func main() {
 	if err != nil {
 		log.Fatal(err)
 	}
-	defer stream.Close()
+	defer func() { _ = stream.Close() }()
 
 	for stream.Next() {
 		if text, ok := stream.Current().ContentDelta(); ok {

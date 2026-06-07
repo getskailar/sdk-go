@@ -26,13 +26,13 @@ func main() {
 	if err != nil {
 		log.Fatal(err)
 	}
-	defer rc.Close()
+	defer func() { _ = rc.Close() }()
 
 	out, err := os.Create("speech.mp3")
 	if err != nil {
 		log.Fatal(err)
 	}
-	defer out.Close()
+	defer func() { _ = out.Close() }()
 
 	n, err := io.Copy(out, rc)
 	if err != nil {
