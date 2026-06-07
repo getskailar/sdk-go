@@ -49,10 +49,14 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
+      # Pinned to the latest Go release that the prebuilt golangci-lint binary
+      # is itself compiled against. Bumping past this triggers a typecheck
+      # mismatch against the runner's newer stdlib until golangci-lint ships
+      # a rebuild.
       - name: Set up Go
         uses: actions/setup-go@v5
         with:
-          go-version: stable
+          go-version: "1.24"
 
       - name: gofmt
         run: |
