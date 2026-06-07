@@ -59,7 +59,8 @@ func (c *Client) postBinary(ctx context.Context, path string, body any, accept s
 		return nil, err
 	}
 	header := http.Header{"Accept": []string{accept}}
-	resp, err := c.doStreaming(ctx, http.MethodPost, path, encoded, header, sideEffect)
+	// Body ownership transfers to the caller of postBinary.
+	resp, err := c.doStreaming(ctx, http.MethodPost, path, encoded, header, sideEffect) //nolint:bodyclose
 	if err != nil {
 		return nil, err
 	}
@@ -75,7 +76,9 @@ func (c *Client) postStream(ctx context.Context, path string, body any) (*ChatCo
 		return nil, err
 	}
 	header := http.Header{"Accept": []string{"text/event-stream"}}
-	resp, err := c.doStreaming(ctx, http.MethodPost, path, encoded, header, sideEffect)
+	// Body ownership transfers to ChatCompletionStream, which closes it via
+	// Close(); bodyclose can't follow it across the assignment.
+	resp, err := c.doStreaming(ctx, http.MethodPost, path, encoded, header, sideEffect) //nolint:bodyclose
 	if err != nil {
 		return nil, err
 	}
