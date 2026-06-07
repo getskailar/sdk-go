@@ -1,0 +1,54 @@
+name: Release
+
+on:
+  push:
+    tags:
+      - "v*"
+
+permissions:
+  contents: write
+
+jobs:
+  release:
+    name: lint, test, and publish release
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Go
+        uses: actions/setup-go@v5
+        with:
+          go-version: stable
+
+      - name: Build
+        run: go build ./...
+
+      - name: Vet
+        run: go vet ./...
+
+      - name: Test (race)
+        run: go test ./... -race -count=1
+
+      - name: Extract changelog for this tag
+        id: changelog
+        run: |
+          version="${GITHUB_REF_NAME#v}"
+          # Pull the section body for this version from CHANGELOG.md.
+          notes="$(awk -v ver="$version" '
+            $0 ~ "^## \\[" ver "\\]" {capture=1; next}
+            capture && /^## \[/ {exit}
+            capture {print}
+          ' CHANGELOG.md)"
+          {
+            echo "notes<<EOF"
+            echo "$notes"
+            echo "EOF"
+          } >> "$GITHUB_OUTPUT"
+
+      - name: Create GitHub release
+        uses: softprops/action-gh-release@v2
+        with:
+          name: ${{ github.ref_name }}
+          body: ${{ steps.changelog.outputs.notes }}
+          draft: false
+          prerelease: ${{ startsWith(github.ref_name, 'v0.') }}

@@ -1,0 +1,23 @@
+# Binaries
+*.exe
+*.exe~
+*.dll
+*.so
+*.dylib
+/examples/*/chat
+/examples/*/streaming
+/examples/*/vision
+/examples/*/tool_calling
+/examples/*/speech
+
+# Test artifacts
+*.test
+*.out
+coverage.txt
+coverage.html
+
+# Editor / OS
+.DS_Store
+.idea/
+.vscode/
+*.swp
